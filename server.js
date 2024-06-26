@@ -115,7 +115,9 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 const port = process.env.PORT || 4000;
-
+app.get("/", (req,res)=> {
+  res.send("Welcome to the server");
+})
 app.use(express.json());
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
