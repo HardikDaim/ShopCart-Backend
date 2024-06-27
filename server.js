@@ -5,47 +5,29 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./utils/db");
 require("dotenv").config();
-const socketIo = require("socket.io");
-const https = require("https");
+const socket = require("socket.io");
 const http = require("http");
-const fs = require("fs");
+const server = http.createServer(app);
 
-// Enable CORS for specific origins
-const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "development"
-      ? ["http://localhost:3000", "http://localhost:3001"]
-      : [
-          "https://shop-cart-dashboard.vercel.app",
-          "https://shop-cart-ten-chi.vercel.app",
-        ],
-  credentials: true,
-};
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://shop-cart-dashboard.vercel.app",
+      "https://shop-cart-ten-chi.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 
-app.use(cors(corsOptions));
-app.use(bodyParser.json());
-app.use(cookieParser());
-
-// Initialize HTTPS or HTTP server based on environment
-let server;
-if (process.env.NODE_ENV === "production") {
-  // Load SSL certificate and key for HTTPS
-  const privateKey = process.env.PRIVATE_KEY;
-  const certificate = process.env.CERTIFICATE;
-  const ca = process.env.CA_BUNDLE;
-  const credentials = { key: privateKey, cert: certificate, ca: ca };
-  console.log(credentials);
-  server = https.createServer(credentials, app);
-} else {
-  server = http.createServer(app);
-}
-
-// Initialize socket.io server
-const io = socketIo(server, {
-  cors: corsOptions,
+const io = socket(server, {
+  cors: {
+    origin: "*",
+    credentials: true,
+  },
 });
 
-// Your socket.io logic
 let allCustomer = [];
 let allSeller = [];
 let admin = [];
@@ -136,12 +118,14 @@ io.on("connection", (soc) => {
   });
 });
 
-// Define your routes
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+const port = process.env.PORT || 4000;
 app.get("/", (req, res) => {
   res.send("Welcome to the server");
 });
-
-// Define other routes as needed
+app.use(express.json());
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
 app.use("/api", require("./routes/dashboard/productRoutes"));
@@ -152,12 +136,6 @@ app.use("/api/home", require("./routes/home/cartRoutes"));
 app.use("/api", require("./routes/order/orderRoutes"));
 app.use("/api/customer", require("./routes/home/customerAuthRoutes"));
 app.use("/api", require("./routes/payment/paymentRoutes"));
-
-// Connect to database
 connectDB();
 
-// Start server
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`Server is running on Port ${PORT}`);
-});
+server.listen(port, () => console.log(`Server is running on Port ${port}`));
