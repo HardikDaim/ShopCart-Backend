@@ -1,51 +1,54 @@
 const express = require("express");
+const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./utils/db");
 require("dotenv").config();
-const socket = require("socket.io");
+const socketIo = require("socket.io");
+const https = require("https");
+const http = require("http");
+const fs = require("fs");
 
-const app = express();
+// Enable CORS for specific origins
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === "development"
+      ? ["http://localhost:3000", "http://localhost:3001"]
+      : [
+          "https://shop-cart-dashboard.vercel.app",
+          "https://shop-cart-ten-chi.vercel.app",
+        ],
+  credentials: true,
+};
 
-// CORS configuration
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "development"
-        ? ["http://localhost:3000", "http://localhost:3001"]
-        : [
-            "https://shop-cart-dashboard.vercel.app",
-            "https://shop-cart-ten-chi.vercel.app",
-          ],
-    credentials: true,
-  })
-);
-
-// Middleware
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// Socket.io setup
-const server = app.listen(process.env.PORT || 4000, () =>
-  console.log(`Server is running on Port ${process.env.PORT || 4000}`)
-);
-const io = socket(server, {
-  cors: {
-    origin:
-      process.env.NODE_ENV === "development"
-        ? ["http://localhost:3000", "http://localhost:3001"]
-        : [
-            "https://shop-cart-dashboard.vercel.app",
-            "https://shop-cart-ten-chi.vercel.app",
-          ],
-    credentials: true,
-  },
+// Initialize HTTPS or HTTP server based on environment
+let server;
+if (process.env.NODE_ENV === "production") {
+  // Load SSL certificate and key for HTTPS
+  const privateKey = process.env.PRIVATE_KEY;
+  const certificate = process.env.CERTIFICATE;
+  const ca = process.env.CA_BUNDLE;
+  const credentials = { key: privateKey, cert: certificate, ca: ca };
+  console.log(credentials);
+  server = https.createServer(credentials, app);
+} else {
+  server = http.createServer(app);
+}
+
+// Initialize socket.io server
+const io = socketIo(server, {
+  cors: corsOptions,
 });
 
+// Your socket.io logic
 let allCustomer = [];
 let allSeller = [];
-let admin = {};
+let admin = [];
 
 const addCustomer = (customerId, socketId, userInfo) => {
   if (!allCustomer.some((customer) => customer.customerId === customerId)) {
@@ -93,7 +96,8 @@ io.on("connection", (soc) => {
     if (adminInfo) {
       delete adminInfo.email;
       delete adminInfo.password;
-      admin = { ...adminInfo, socketId: soc.id };
+      const admin = adminInfo;
+      admin.socketId = soc.id;
       io.emit("activeSeller", allSeller);
     }
   });
@@ -132,12 +136,12 @@ io.on("connection", (soc) => {
   });
 });
 
-// Routes
+// Define your routes
 app.get("/", (req, res) => {
   res.send("Welcome to the server");
 });
 
-// API routes
+// Define other routes as needed
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
 app.use("/api", require("./routes/dashboard/productRoutes"));
@@ -149,5 +153,11 @@ app.use("/api", require("./routes/order/orderRoutes"));
 app.use("/api/customer", require("./routes/home/customerAuthRoutes"));
 app.use("/api", require("./routes/payment/paymentRoutes"));
 
-// Database connection
+// Connect to database
 connectDB();
+
+// Start server
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => {
+  console.log(`Server is running on Port ${PORT}`);
+});
