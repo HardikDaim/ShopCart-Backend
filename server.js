@@ -22,12 +22,12 @@ app.use(
   })
 );
 
-const io = socket(server, {
-  cors: {
-    origin: true,
-    credentials: true,
-  },
-});
+// const io = socket(server, {
+//   cors: {
+//     origin: true,
+//     credentials: true,
+//   },
+// });
 
 let allCustomer = [];
 let allSeller = [];
@@ -60,64 +60,64 @@ const remove = (socketId) => {
   allSeller = allSeller.filter((seller) => seller.socketId !== socketId);
 };
 
-io.on("connection", (soc) => {
-  console.log("Socket Server is running");
+// io.on("connection", (soc) => {
+//   console.log("Socket Server is running");
 
-  soc.on("add_customer", (customerId, userInfo) => {
-    addCustomer(customerId, soc.id, userInfo);
-    io.emit("activeSeller", allSeller);
-    io.emit("activeCustomer", allCustomer);
-  });
+//   soc.on("add_customer", (customerId, userInfo) => {
+//     addCustomer(customerId, soc.id, userInfo);
+//     io.emit("activeSeller", allSeller);
+//     io.emit("activeCustomer", allCustomer);
+//   });
 
-  soc.on("add_seller", (sellerId, userInfo) => {
-    addSeller(sellerId, soc.id, userInfo);
-    io.emit("activeSeller", allSeller);
-    io.emit("activeCustomer", allCustomer);
-  });
+//   soc.on("add_seller", (sellerId, userInfo) => {
+//     addSeller(sellerId, soc.id, userInfo);
+//     io.emit("activeSeller", allSeller);
+//     io.emit("activeCustomer", allCustomer);
+//   });
 
-  soc.on("add_admin", (adminInfo) => {
-    if (adminInfo) {
-      delete adminInfo.email;
-      delete adminInfo.password;
-      const admin = adminInfo;
-      admin.socketId = soc.id;
-      io.emit("activeSeller", allSeller);
-    }
-  });
+//   soc.on("add_admin", (adminInfo) => {
+//     if (adminInfo) {
+//       delete adminInfo.email;
+//       delete adminInfo.password;
+//       const admin = adminInfo;
+//       admin.socketId = soc.id;
+//       io.emit("activeSeller", allSeller);
+//     }
+//   });
 
-  soc.on("send_seller_message", (msg) => {
-    const customer = findCustomer(msg.receiverId);
-    if (customer) {
-      soc.to(customer.socketId).emit("seller_message", msg);
-    }
-  });
+//   soc.on("send_seller_message", (msg) => {
+//     const customer = findCustomer(msg.receiverId);
+//     if (customer) {
+//       soc.to(customer.socketId).emit("seller_message", msg);
+//     }
+//   });
 
-  soc.on("send_customer_message", (msg) => {
-    const seller = findSeller(msg.receiverId);
-    if (seller) {
-      soc.to(seller.socketId).emit("customer_message", msg);
-    }
-  });
+//   soc.on("send_customer_message", (msg) => {
+//     const seller = findSeller(msg.receiverId);
+//     if (seller) {
+//       soc.to(seller.socketId).emit("customer_message", msg);
+//     }
+//   });
 
-  soc.on("send_message_admin_to_seller", (msg) => {
-    const seller = findSeller(msg.receiverId);
-    if (seller) {
-      soc.to(seller.socketId).emit("received_admin_message", msg);
-    }
-  });
+//   soc.on("send_message_admin_to_seller", (msg) => {
+//     const seller = findSeller(msg.receiverId);
+//     if (seller) {
+//       soc.to(seller.socketId).emit("received_admin_message", msg);
+//     }
+//   });
 
-  soc.on("send_message_seller_to_admin", (msg) => {
-    if (admin.socketId) {
-      soc.to(admin.socketId).emit("received_seller_message", msg);
-    }
-  });
+//   soc.on("send_message_seller_to_admin", (msg) => {
+//     if (admin.socketId) {
+//       soc.to(admin.socketId).emit("received_seller_message", msg);
+//     }
+//   });
 
-  soc.on("disconnect", () => {
-    remove(soc.id);
-    io.emit("activeSeller", allSeller);
-    io.emit("activeCustomer", allCustomer);
-  });
-});
+//   soc.on("disconnect", () => {
+//     remove(soc.id);
+//     io.emit("activeSeller", allSeller);
+//     io.emit("activeCustomer", allCustomer);
+//   });
+// });
 
 app.use(bodyParser.json());
 app.use(cookieParser());
