@@ -1,31 +1,51 @@
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./utils/db");
 require("dotenv").config();
 const socket = require("socket.io");
-const http = require("http");
-const server = http.createServer(app);
 
+const app = express();
+
+// CORS configuration
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin:
+      process.env.NODE_ENV === "development"
+        ? ["http://localhost:3000", "http://localhost:3001"]
+        : [
+            "https://shop-cart-dashboard.vercel.app",
+            "https://shop-cart-ten-chi.vercel.app",
+          ],
     credentials: true,
   })
 );
 
+// Middleware
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+// Socket.io setup
+const server = app.listen(process.env.PORT || 4000, () =>
+  console.log(`Server is running on Port ${process.env.PORT || 4000}`)
+);
 const io = socket(server, {
   cors: {
-    origin: "*",
+    origin:
+      process.env.NODE_ENV === "development"
+        ? ["http://localhost:3000", "http://localhost:3001"]
+        : [
+            "https://shop-cart-dashboard.vercel.app",
+            "https://shop-cart-ten-chi.vercel.app",
+          ],
     credentials: true,
   },
 });
 
 let allCustomer = [];
 let allSeller = [];
-let admin = [];
+let admin = {};
 
 const addCustomer = (customerId, socketId, userInfo) => {
   if (!allCustomer.some((customer) => customer.customerId === customerId)) {
@@ -73,8 +93,7 @@ io.on("connection", (soc) => {
     if (adminInfo) {
       delete adminInfo.email;
       delete adminInfo.password;
-      const admin = adminInfo;
-      admin.socketId = soc.id;
+      admin = { ...adminInfo, socketId: soc.id };
       io.emit("activeSeller", allSeller);
     }
   });
@@ -113,14 +132,12 @@ io.on("connection", (soc) => {
   });
 });
 
-app.use(bodyParser.json());
-app.use(cookieParser());
-
-const port = process.env.PORT || 4000;
+// Routes
 app.get("/", (req, res) => {
   res.send("Welcome to the server");
 });
-app.use(express.json());
+
+// API routes
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
 app.use("/api", require("./routes/dashboard/productRoutes"));
@@ -131,6 +148,6 @@ app.use("/api/home", require("./routes/home/cartRoutes"));
 app.use("/api", require("./routes/order/orderRoutes"));
 app.use("/api/customer", require("./routes/home/customerAuthRoutes"));
 app.use("/api", require("./routes/payment/paymentRoutes"));
-connectDB();
 
-server.listen(port, () => console.log(`Server is running on Port ${port}`));
+// Database connection
+connectDB();
