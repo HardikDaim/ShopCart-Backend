@@ -16,6 +16,7 @@ app.use(
       "http://localhost:3001",
       "https://shop-cart-dashboard.vercel.app",
       "https://shop-cart-ten-chi.vercel.app",
+       "https://shop-cart-backend-green.vercel.app"
     ],
     credentials: true,
   })
@@ -24,7 +25,6 @@ app.use(
 const io = socket(server, {
   cors: {
     origin: true,
-
     credentials: true,
   },
 });
