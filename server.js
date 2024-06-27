@@ -11,7 +11,7 @@ const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
   })
 );
@@ -48,7 +48,9 @@ const findSeller = (sellerId) => {
 };
 
 const remove = (socketId) => {
-  allCustomer = allCustomer.filter((customer) => customer.socketId !== socketId);
+  allCustomer = allCustomer.filter(
+    (customer) => customer.socketId !== socketId
+  );
   allSeller = allSeller.filter((seller) => seller.socketId !== socketId);
 };
 
@@ -66,7 +68,7 @@ io.on("connection", (soc) => {
     io.emit("activeSeller", allSeller);
     io.emit("activeCustomer", allCustomer);
   });
-  
+
   soc.on("add_admin", (adminInfo) => {
     if (adminInfo) {
       delete adminInfo.email;
@@ -74,7 +76,7 @@ io.on("connection", (soc) => {
       const admin = adminInfo;
       admin.socketId = soc.id;
       io.emit("activeSeller", allSeller);
-  } 
+    }
   });
 
   soc.on("send_seller_message", (msg) => {
@@ -115,9 +117,9 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 const port = process.env.PORT || 4000;
-app.get("/", (req,res)=> {
+app.get("/", (req, res) => {
   res.send("Welcome to the server");
-})
+});
 app.use(express.json());
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
