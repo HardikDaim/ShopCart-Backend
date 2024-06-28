@@ -41,12 +41,12 @@ const add_category = async (req, res) => {
           folder: "categories",
         }
       );
-
+      
       if (uploadResult) {
         const category = await categoryModel.create({
           name: trimmedName,
           slug,
-          image: uploadResult.url,
+          image: uploadResult.secure_url ,
         });
 
         return res

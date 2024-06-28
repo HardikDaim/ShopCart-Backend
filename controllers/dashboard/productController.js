@@ -51,12 +51,12 @@ const add_image = (req, res) => {
             folder: "products",
           });
 
-          if (!result || !result.url) {
+          if (!result || !result.secure_url) {
             console.error("Image upload failed");
             continue;
           }
 
-          images.push(result.url);
+          images.push(result.secure_url);
         }
       } else if (newImages) {
         // Handle a single file
@@ -64,12 +64,12 @@ const add_image = (req, res) => {
           folder: "products",
         });
 
-        if (!result || !result.url) {
+        if (!result || !result.secure_url) {
           console.error("Image upload failed");
           return res.status(500).json({ error: "Image upload failed" });
         }
 
-        images.push(result.url);
+        images.push(result.secure_url);
       }
 
       await productModel.findByIdAndUpdate(productId, { images });
@@ -140,7 +140,7 @@ const product_image_update = async (req, res) => {
         folder: "products",
       });
 
-      if (!result || !result.url) {
+      if (!result || !result.secure_url ) {
         console.error("Image upload failed");
         return res.status(500).json({ error: "Image Upload Failed" });
       }
@@ -168,7 +168,7 @@ const product_image_update = async (req, res) => {
           .json({ error: "Old image not found in product images" });
       }
 
-      images[index] = result.url;
+      images[index] = result.secure_url;
       await productModel.findByIdAndUpdate(productId, { images });
 
       product = await productModel.findById(productId);
@@ -267,13 +267,13 @@ const add_product = async (req, res) => {
           const result = await cloudinary.uploader.upload(images[i].filepath, {
             folder: "products",
           });
-          allImageUrl.push(result.url);
+          allImageUrl.push(result.secure_url );
         }
       } else {
         const result = await cloudinary.uploader.upload(images.filepath, {
           folder: "products",
         });
-        allImageUrl.push(result.url);
+        allImageUrl.push(result.secure_url );
       }
 
       const product = await productModel.create({

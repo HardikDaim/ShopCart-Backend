@@ -145,7 +145,7 @@ const price_range_product = async (req, res) => {
     };
     const products = await productModel
       .find({})
-      .limit(9)
+      .limit(12)
       .sort({ createdAt: -1 });
     const latestProducts = formateProduct(products);
     const getPrice = await productModel.find({}).sort({ price: 1 });

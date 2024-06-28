@@ -137,8 +137,8 @@ const profile_image_upload = async (req, res) => {
         folder: "profiles",
       });
 
-      if (result && result.url) {
-        await sellerModel.findByIdAndUpdate(id, { image: result.url });
+      if (result && result.secure_url ) {
+        await sellerModel.findByIdAndUpdate(id, { image: result.secure_url  });
         const userInfo = await sellerModel.findById(id);
         if (!userInfo) {
           return res.status(404).json({ error: "User not found" });
