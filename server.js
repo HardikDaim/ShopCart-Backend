@@ -137,6 +137,7 @@ app.use("/api/home", require("./routes/home/cartRoutes"));
 app.use("/api", require("./routes/order/orderRoutes"));
 app.use("/api/customer", require("./routes/home/customerAuthRoutes"));
 app.use("/api", require("./routes/payment/paymentRoutes"));
+app.use("/api/search", require("./routes/search/searchRoutes"));
 connectDB();
 
 server.listen(port, () => console.log(`Server is running on Port ${port}`));

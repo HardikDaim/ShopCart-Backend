@@ -11,4 +11,5 @@ router.get("/query-products", homeController.query_products);
 router.get("/product/details/:slug", homeController.product_details);
 
 
+
 module.exports = router;
