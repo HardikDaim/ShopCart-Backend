@@ -28,36 +28,36 @@ app.use(
 //   },
 // });
 
-let allCustomer = [];
-let allSeller = [];
-let admin = [];
+// let allCustomer = [];
+// let allSeller = [];
+// let admin = [];
 
-const addCustomer = (customerId, socketId, userInfo) => {
-  if (!allCustomer.some((customer) => customer.customerId === customerId)) {
-    allCustomer.push({ customerId, socketId, userInfo });
-  }
-};
+// const addCustomer = (customerId, socketId, userInfo) => {
+//   if (!allCustomer.some((customer) => customer.customerId === customerId)) {
+//     allCustomer.push({ customerId, socketId, userInfo });
+//   }
+// };
 
-const addSeller = (sellerId, socketId, userInfo) => {
-  if (!allSeller.some((seller) => seller.sellerId === sellerId)) {
-    allSeller.push({ sellerId, socketId, userInfo });
-  }
-};
+// const addSeller = (sellerId, socketId, userInfo) => {
+//   if (!allSeller.some((seller) => seller.sellerId === sellerId)) {
+//     allSeller.push({ sellerId, socketId, userInfo });
+//   }
+// };
 
-const findCustomer = (customerId) => {
-  return allCustomer.find((c) => c.customerId === customerId);
-};
+// const findCustomer = (customerId) => {
+//   return allCustomer.find((c) => c.customerId === customerId);
+// };
 
-const findSeller = (sellerId) => {
-  return allSeller.find((c) => c.sellerId === sellerId);
-};
+// const findSeller = (sellerId) => {
+//   return allSeller.find((c) => c.sellerId === sellerId);
+// };
 
-const remove = (socketId) => {
-  allCustomer = allCustomer.filter(
-    (customer) => customer.socketId !== socketId
-  );
-  allSeller = allSeller.filter((seller) => seller.socketId !== socketId);
-};
+// const remove = (socketId) => {
+//   allCustomer = allCustomer.filter(
+//     (customer) => customer.socketId !== socketId
+//   );
+//   allSeller = allSeller.filter((seller) => seller.socketId !== socketId);
+// };
 
 // io.on("connection", (soc) => {
 //   console.log("Socket Server is running");
@@ -125,6 +125,7 @@ const port = process.env.PORT || 4000;
 app.get("/", (req, res) => {
   res.send("Welcome to the server");
 });
+
 app.use(express.json());
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
