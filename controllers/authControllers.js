@@ -6,6 +6,14 @@ const sellerCustomerModel = require("../models/chat/sellerCustomerModel");
 const formidable = require("formidable");
 const cloudinary = require("cloudinary").v2;
 
+const cookieOptions = {
+  expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+  domain: process.env.COOKIE_DOMAIN || 'localhost',
+  secure: process.env.NODE_ENV === "production",
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax', // None in production, Lax in development
+};
+
 const admin_login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -24,12 +32,7 @@ const admin_login = async (req, res) => {
       role: admin.role,
     });
 
-    res.cookie("accessToken", token, {
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      domain: process.env.COOKIE_DOMAIN || 'localhost', 
-      secure: process.env.NODE_ENV === "production", 
-      httpOnly: true, 
-    });
+    res.cookie("accessToken", token, cookieOptions);
 
     return res.status(200).json({ message: "Login Successful", token });
   } catch (error) {
@@ -69,19 +72,14 @@ const seller_register = async (req, res) => {
       });
       await sellerCustomerModel.create({ myId: seller._id });
       const token = await createToken({ id: seller._id, role: seller.role });
-      res.cookie("accessToken", token, {
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 Days
-        domain: process.env.COOKIE_DOMAIN || 'localhost', 
-        secure: process.env.NODE_ENV === "production", 
-        httpOnly: true, 
-      });
+      res.cookie("accessToken", token, cookieOptions);
       return res.status(201).json({
         message: "Registered Successfully, Login to Get Started",
         token,
       });
     }
   } catch (error) {
-    return res.statue(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -103,12 +101,7 @@ const seller_login = async (req, res) => {
       role: seller.role,
     });
 
-    res.cookie("accessToken", token, {
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      domain: process.env.COOKIE_DOMAIN || 'localhost', 
-      secure: process.env.NODE_ENV === "production", 
-      httpOnly: true, 
-    });
+    res.cookie("accessToken", token, cookieOptions);
 
     return res.status(200).json({ message: "Login Successful", token });
   } catch (error) {
@@ -146,8 +139,8 @@ const profile_image_upload = async (req, res) => {
         folder: "profiles",
       });
 
-      if (result && result.secure_url ) {
-        await sellerModel.findByIdAndUpdate(id, { image: result.secure_url  });
+      if (result && result.secure_url) {
+        await sellerModel.findByIdAndUpdate(id, { image: result.secure_url });
         const userInfo = await sellerModel.findById(id);
         if (!userInfo) {
           return res.status(404).json({ error: "User not found" });
@@ -167,28 +160,34 @@ const profile_image_upload = async (req, res) => {
 };
 
 const add_profile_info = async (req, res) => {
-  const {shopName, state,city,country} = req.body;
-  const {id} = req;
+  const { shopName, state, city, country } = req.body;
+  const { id } = req;
   try {
-    await sellerModel.findByIdAndUpdate(id, {shopInfo: {shopName,state,city,country}});
+    await sellerModel.findByIdAndUpdate(id, {
+      shopInfo: { shopName, state, city, country },
+    });
     const userInfo = await sellerModel.findById(id);
-    res.status(200).json({message: "Profile Updated Successfully", userInfo})
+    res.status(200).json({ message: "Profile Updated Successfully", userInfo });
   } catch (error) {
-    res.status(404).json({error: "Profile Updation Failed"})
+    res.status(404).json({ error: "Profile Updation Failed" });
   }
 };
 
-const logout = (req,res) => {
+const logout = (req, res) => {
   try {
-    res.cookie('accessToken', '', {
-      expires: new Date(0)
+    res.cookie("accessToken", "", {
+      expires: new Date(0),
+      domain: process.env.COOKIE_DOMAIN || 'localhost',
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax',
     });
-    return res.status(200).json({message: 'Logout Successfully'})
+    return res.status(200).json({ message: "Logout Successfully" });
   } catch (error) {
-    console.error("Error parsing form data:", err);
-    return res.status(500).json({ error: "Error parsing form data" });
+    console.error("Error parsing form data:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
 
 module.exports = {
   admin_login,
@@ -197,5 +196,5 @@ module.exports = {
   seller_login,
   profile_image_upload,
   add_profile_info,
-  logout
+  logout,
 };
