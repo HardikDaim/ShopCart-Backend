@@ -12,10 +12,10 @@ const server = http.createServer(app);
 app.use(
   cors({
     origin: [
+      "https://shop-cart-dashboard.vercel.app",
+      "https://shop-cart-ten-chi.vercel.app",
       "http://localhost:3000",
       "http://localhost:3001",
-      "https://shop-cart-ten-chi.vercel.app",
-      "https://shop-cart-dashboard.vercel.app",
     ],
     credentials: true,
   })
