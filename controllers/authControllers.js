@@ -26,9 +26,6 @@ const admin_login = async (req, res) => {
 
     res.cookie("accessToken", token, {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
     return res.status(200).json({ message: "Login Successful", token });
@@ -71,9 +68,6 @@ const seller_register = async (req, res) => {
       const token = await createToken({ id: seller._id, role: seller.role });
       res.cookie("accessToken", token, {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 Days
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       });
       return res.status(201).json({
         message: "Registered Successfully, Login to Get Started",
@@ -105,9 +99,6 @@ const seller_login = async (req, res) => {
 
     res.cookie("accessToken", token, {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
     return res.status(200).json({ message: "Login Successful", token });

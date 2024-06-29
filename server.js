@@ -9,26 +9,17 @@ const socket = require("socket.io");
 const http = require("http");
 const server = http.createServer(app);
 
-const devOrigins = ["http://localhost:3000", "http://localhost:3001"];
-const prodOrigins = [
-  "https://shop-cart-dashboard.vercel.app",
-  "https://shop-cart-ten-chi.vercel.app"
-];
-
-const allowedOrigins = process.env.NODE_ENV === "production" ? prodOrigins : devOrigins;
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://shop-cart-ten-chi.vercel.app",
+      "https://shop-cart-dashboard.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 
 // const io = socket(server, {
 //   cors: {
