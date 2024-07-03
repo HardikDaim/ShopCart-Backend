@@ -10,7 +10,7 @@ module.exports.authMiddleware = async (req, res, next) => {
             const decodeToken = await jwt.verify(accessToken, process.env.SECRET);
             req.role = decodeToken.role;
             req.id = decodeToken.id;
-            console.log('User authenticated:', decodeToken);
+            console.log('User authenticated');
             next();
         } catch (error) {
             console.error('JWT Verification Error:', error);

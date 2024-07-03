@@ -8,10 +8,9 @@ const cloudinary = require("cloudinary").v2;
 
 const cookieOptions = {
   expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-  domain: process.env.COOKIE_DOMAIN || 'localhost',
   secure: process.env.NODE_ENV === "production",
   httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax', // None in production, Lax in development
+  sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax', 
 };
 
 const admin_login = async (req, res) => {
@@ -177,7 +176,6 @@ const logout = (req, res) => {
   try {
     res.cookie("accessToken", "", {
       expires: new Date(0),
-      domain: process.env.COOKIE_DOMAIN || 'localhost',
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax',

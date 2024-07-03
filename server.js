@@ -17,7 +17,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
     ],
-    credentials: true,
+    credentials: true, 
   })
 );
 
@@ -130,6 +130,7 @@ app.use(express.json());
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/dashboard/categoryRoutes"));
 app.use("/api", require("./routes/dashboard/productRoutes"));
+app.use("/api", require("./routes/dashboard/dashboardRoutes"));
 app.use("/api", require("./routes/chat/chatRoutes"));
 app.use("/api", require("./routes/dashboard/sellerRoutes"));
 app.use("/api/home", require("./routes/home/homeRoutes"));
@@ -140,4 +141,4 @@ app.use("/api", require("./routes/payment/paymentRoutes"));
 app.use("/api/search", require("./routes/search/searchRoutes"));
 connectDB();
 
-server.listen(port, () => console.log(`Server is running on Port ${port}`));
+app.listen(port, () => console.log(`Server is running on Port ${port}`));
