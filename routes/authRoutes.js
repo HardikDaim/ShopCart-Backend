@@ -17,6 +17,12 @@ router.post(
   authMiddleware,
   authControllers.add_profile_info
 );
+router.post(
+  "/mail/seller-update-profile",
+  authMiddleware,
+  authControllers.seller_profile_update_mail
+);
+
 router.get("/logout", authMiddleware, authControllers.logout);
 
 module.exports = router;

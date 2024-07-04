@@ -5,13 +5,23 @@ const sellerModel = require("../models/sellerModel");
 const sellerCustomerModel = require("../models/chat/sellerCustomerModel");
 const formidable = require("formidable");
 const cloudinary = require("cloudinary").v2;
+const nodemailer = require("nodemailer");
 
 const cookieOptions = {
   expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
   secure: process.env.NODE_ENV === "production",
   httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax', 
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
 };
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  secure: true,
+  auth: {
+    user: "hardikdaim@gmail.com",
+    pass: "ybjm lryg iyub caax",
+  },
+});
 
 const admin_login = async (req, res) => {
   const { email, password } = req.body;
@@ -73,7 +83,7 @@ const seller_register = async (req, res) => {
       const token = await createToken({ id: seller._id, role: seller.role });
       res.cookie("accessToken", token, cookieOptions);
       return res.status(201).json({
-        message: "Registered Successfully, Login to Get Started",
+        message: "Registered Successfully",
         token,
       });
     }
@@ -172,13 +182,194 @@ const add_profile_info = async (req, res) => {
   }
 };
 
+const seller_profile_update_mail = async (req, res) => {
+  const { shopName, state, city, country } = req.body;
+  const { id } = req;
+  try {
+    const userInfo = await sellerModel.findById(id);
+    const sellerEmail = userInfo.email;
+
+    // Mail to Admin
+    await transporter.sendMail({
+      from: '"ShopCart - Seller Dashboard" <hardikdaim@gmail.com>', // sender
+      to: "hardikdaim@gmail.com",
+      subject: "New Seller Profile Updated",
+      html: `
+      <html>
+        <head>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+            body {
+              font-family: 'Roboto', sans-serif;
+              background-color: #f4f4f4;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .header {
+              background-color: #007BFF;
+              color: #ffffff;
+              padding: 10px;
+              border-radius: 8px 8px 0 0;
+              text-align: center;
+            }
+            .content {
+              padding: 20px;
+            }
+            .content h2 {
+              color: #333333;
+            }
+            .content p {
+              color: #666666;
+              line-height: 1.5;
+            }
+            .footer {
+              background-color: #007BFF;
+              color: #ffffff;
+              padding: 10px;
+              border-radius: 0 0 8px 8px;
+              text-align: center;
+            }
+            .btn {
+              display: inline-block;
+              padding: 10px 20px;
+              margin-top: 20px;
+              color: #ffffff;
+              background-color: #28a745;
+              text-decoration: none;
+              border-radius: 4px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>ShopCart - Seller Dashboard</h1>
+            </div>
+            <div class="content">
+              <h2>Seller Profile Update Notification</h2>
+              <p>Hello Admin,</p>
+              <p>A seller has updated their profile. Please review the details below and update the seller account from pending to active if everything is in order.</p>
+              <p><strong>Seller Information:</strong></p>
+              <p><strong>Seller Name:</strong> ${userInfo.name}</p>
+              <p><strong>Shop Name:</strong> ${shopName}</p>
+              <p><strong>Status:</strong> ${userInfo.status}</p>
+              <p><strong>Location:</strong> ${city}, ${state}, ${country}</p>
+              <p>Thank you for your attention.</p>
+              <a href="https://shop-cart-dashboard.vercel.app/admin/dashboard/seller-request" class="btn">Review Seller Profile</a>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} ShopCart. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+      `,
+    });
+
+    // Mail to Seller
+    await transporter.sendMail({
+      from: '"ShopCart - Seller Dashboard" <hardikdaim@gmail.com>', // sender
+      to: sellerEmail,
+      subject: "Your Seller Profile is Under Review",
+      html: `
+      <html>
+        <head>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+            body {
+              font-family: 'Roboto', sans-serif;
+              background-color: #f4f4f4;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .header {
+              background-color: #007BFF;
+              color: #ffffff;
+              padding: 10px;
+              border-radius: 8px 8px 0 0;
+              text-align: center;
+            }
+            .content {
+              padding: 20px;
+            }
+            .content h2 {
+              color: #333333;
+            }
+            .content p {
+              color: #666666;
+              line-height: 1.5;
+            }
+            .footer {
+              background-color: #007BFF;
+              color: #ffffff;
+              padding: 10px;
+              border-radius: 0 0 8px 8px;
+              text-align: center;
+            }
+            .btn {
+              display: inline-block;
+              padding: 10px 20px;
+              margin-top: 20px;
+              color: #ffffff;
+              background-color: #28a745;
+              text-decoration: none;
+              border-radius: 4px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>ShopCart - Seller Dashboard</h1>
+            </div>
+            <div class="content">
+              <h2>Your Profile is Under Review</h2>
+              <p>Hello ${userInfo.name},</p>
+              <p>Thank you for completing your seller profile. Your profile is currently under review by our admin team. You will be notified once your account is approved and activated.</p>
+              <p>In the meantime, please make sure you have added your profile photo and all required data. If you have any questions or need assistance, feel free to contact our support team.</p>
+              <a href="https://shop-cart-dashboard.vercel.app/seller/dashboard/profile" class="btn">View Profile</a>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} ShopCart. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+      `,
+    });
+
+    res.status(200).json();
+  } catch (error) {
+    console.error("Error Sending Mail:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
 const logout = (req, res) => {
   try {
     res.cookie("accessToken", "", {
       expires: new Date(0),
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? 'None' : 'Lax',
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
     return res.status(200).json({ message: "Logout Successfully" });
   } catch (error) {
@@ -195,4 +386,5 @@ module.exports = {
   profile_image_upload,
   add_profile_info,
   logout,
+  seller_profile_update_mail,
 };
