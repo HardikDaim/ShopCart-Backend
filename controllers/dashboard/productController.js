@@ -140,7 +140,7 @@ const product_image_update = async (req, res) => {
         folder: "products",
       });
 
-      if (!result || !result.secure_url ) {
+      if (!result || !result.secure_url) {
         console.error("Image upload failed");
         return res.status(500).json({ error: "Image Upload Failed" });
       }
@@ -267,13 +267,13 @@ const add_product = async (req, res) => {
           const result = await cloudinary.uploader.upload(images[i].filepath, {
             folder: "products",
           });
-          allImageUrl.push(result.secure_url );
+          allImageUrl.push(result.secure_url);
         }
       } else {
         const result = await cloudinary.uploader.upload(images.filepath, {
           folder: "products",
         });
-        allImageUrl.push(result.secure_url );
+        allImageUrl.push(result.secure_url);
       }
 
       const product = await productModel.create({
@@ -330,6 +330,56 @@ const get_products = async (req, res) => {
   }
 };
 
+const delete_product = async (req, res) => {
+  const { _id } = req.body;
+  const productId = _id;
+  try {
+    if (!productId) {
+      return res.status(400).json({ error: "Product ID is required" });
+    }
+    const deletedProduct = await productModel.findByIdAndDelete(productId);
+    if (!deletedProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    res
+      .status(200)
+      .json({ message: "Product deleted successfully", productId });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const get_discounted_products = async (req, res) => {
+  const { page, searchValue, perPage } = req.query;
+  const { id } = req;
+
+  const pageInt = parseInt(page);
+  const perPageInt = parseInt(perPage);
+  const skipPage = perPageInt * (pageInt - 1);
+
+  try {
+    let query = { discount: { $gt: 0 } }; // Query for discounted products
+
+    if (searchValue) {
+      query.name = { $regex: new RegExp(searchValue, "i") }; // Case-insensitive search by name
+    }
+
+    const products = await productModel
+      .find(query)
+      .skip(skipPage)
+      .limit(perPageInt)
+      .sort({ createdAt: -1 });
+
+    const totalProducts = await productModel.countDocuments(query);
+
+    res.status(200).json({ products, totalProducts });
+  } catch (error) {
+    console.error("Error fetching discounted products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   add_product,
   get_products,
@@ -338,4 +388,6 @@ module.exports = {
   product_image_update,
   delete_product_image,
   add_image,
+  delete_product,
+  get_discounted_products,
 };
