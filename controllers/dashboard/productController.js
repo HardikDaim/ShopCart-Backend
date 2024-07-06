@@ -297,7 +297,6 @@ const add_product = async (req, res) => {
     }
   });
 };
-
 const get_products = async (req, res) => {
   const { page, searchValue, perPage } = req.query;
   const { id } = req;
@@ -310,7 +309,11 @@ const get_products = async (req, res) => {
     // Build the query object
     let query = { sellerId: id };
     if (searchValue) {
-      query.$text = { $search: searchValue };
+      query.$or = [
+        { name: { $regex: new RegExp(searchValue, "i") } },
+        { category: { $regex: new RegExp(searchValue, "i") } },
+        { brand: { $regex: new RegExp(searchValue, "i") } },
+      ];
     }
 
     // Fetch products based on the query
@@ -329,6 +332,7 @@ const get_products = async (req, res) => {
     return res.status(500).json({ error: "Error fetching products" });
   }
 };
+
 
 const delete_product = async (req, res) => {
   const { _id } = req.body;
@@ -362,7 +366,11 @@ const get_discounted_products = async (req, res) => {
     let query = { discount: { $gt: 0 } }; // Query for discounted products
 
     if (searchValue) {
-      query.name = { $regex: new RegExp(searchValue, "i") }; // Case-insensitive search by name
+      query.$or = [
+        { name: { $regex: new RegExp(searchValue, "i") } },
+        { category: { $regex: new RegExp(searchValue, "i") } },
+        { brand: { $regex: new RegExp(searchValue, "i") } },
+      ];
     }
 
     const products = await productModel
