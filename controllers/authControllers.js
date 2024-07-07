@@ -378,6 +378,38 @@ const logout = (req, res) => {
   }
 };
 
+const change_seller_password = async (req, res) => {
+  const { email, oldPassword, newPassword, confirmPassword } = req.body;
+
+  try {
+    if (!email || !oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "Please fill all the fields" });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "Password and Confirm Password do not match" });
+    }
+
+    const seller = await sellerModel.findOne({ email });
+    if (!seller) {
+      return res.status(400).json({ error: "Seller does not exist" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, seller.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Old Password is incorrect" });
+    }
+
+    const hashPassword = await bcrypt.hash(newPassword, 10); 
+    seller.password = hashPassword;
+    await seller.save();
+
+    return res.status(200).json({ message: "Password Changed Successfully", userInfo: seller });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+}
+
 module.exports = {
   admin_login,
   getUser,
@@ -387,4 +419,5 @@ module.exports = {
   add_profile_info,
   logout,
   seller_profile_update_mail,
+  change_seller_password
 };

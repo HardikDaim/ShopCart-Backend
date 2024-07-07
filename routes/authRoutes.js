@@ -23,6 +23,12 @@ router.post(
   authControllers.seller_profile_update_mail
 );
 
+router.post(
+  "/change-password",
+  authMiddleware,
+  authControllers.change_seller_password
+);
+
 router.get("/logout", authMiddleware, authControllers.logout);
 
 module.exports = router;
