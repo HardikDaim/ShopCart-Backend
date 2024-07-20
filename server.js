@@ -12,14 +12,13 @@ const server = http.createServer(app);
 
 const io = socketIo(server, {
   cors: {
-    origin: [
-      "https://shop-cart-dashboard.vercel.app",
-      "https://shop-cart-ten-chi.vercel.app",
-      "http://localhost:3000",
-      "http://localhost:3001",
-    ],
+    origin: "*",
     credentials: true,
   },
+  path: '/socket.io',
+  wssEngine: ['ws','wss'],
+  transports: ['websocket', 'polling'],
+  allowEI03: true,
 });
 
 app.use(
