@@ -163,6 +163,7 @@ const profile_image_upload = async (req, res) => {
           .json({ error: "Error uploading image to Cloudinary" });
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
   });
