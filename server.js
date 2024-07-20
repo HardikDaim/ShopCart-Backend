@@ -1,15 +1,16 @@
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const connectDB = require("./utils/db");
-require("dotenv").config();
-const socket = require("socket.io");
 const http = require("http");
+const socketIo = require("socket.io");
+require("dotenv").config();
+const connectDB = require("./utils/db");
 
+const app = express();
 const server = http.createServer(app);
-const io = socket(server, {
+
+const io = socketIo(server, {
   cors: {
     origin: [
       "https://shop-cart-dashboard.vercel.app",
@@ -41,7 +42,7 @@ const port = process.env.PORT || 4000;
 
 let allCustomer = [];
 let allSeller = [];
-let admin = [];
+let admin = {};
 
 const addCustomer = (customerId, socketId, userInfo) => {
   if (!allCustomer.some((customer) => customer.customerId === customerId)) {
@@ -57,7 +58,6 @@ const addSeller = (sellerId, socketId, userInfo) => {
 
 const findCustomer = (customerId) => {
   return allCustomer.find((c) => c.customerId === customerId);
-
 };
 
 const findSeller = (sellerId) => {
@@ -139,7 +139,6 @@ io.on("connection", (soc) => {
     io.emit("activeCustomer", allCustomer);
   });
 });
-
 
 app.get("/", (req, res) => {
   res.send("Welcome to Hardik's Server");
