@@ -7,6 +7,6 @@ router.post("/registerMail", customerAuthController.register_Mail);
 router.post("/customer-login", customerAuthController.customer_login);
 router.post("/loginMail", customerAuthController.login_Mail);
 router.get("/logout", customerAuthController.customer_logout);
-
+router.post("/change-password", customerAuthController.change_customer_password);
 
 module.exports = router;

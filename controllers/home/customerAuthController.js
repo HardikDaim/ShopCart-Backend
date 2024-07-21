@@ -242,10 +242,42 @@ const customer_logout = async (req, res) => {
   return res.status(200).json({ message: "logout Successfully" });
 };
 
+const change_customer_password = async(req, res) => {
+  const { email, oldPassword, newPassword, confirmPassword } = req.body;
+  try {
+    if (!email || !oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "Please fill all the fields" });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "Password and Confirm Password do not match" });
+    }
+
+    const customer = await customerModel.findOne({ email });
+    if (!customer) {
+      return res.status(400).json({ error: "Customer does not exist" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, customer.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current Password is incorrect" });
+    }
+
+    const hashPassword = await bcrypt.hash(newPassword, 10); 
+    customer.password = hashPassword;
+    await customer.save();
+
+    return res.status(200).json({ message: "Password Changed Successfully", userInfo: customer });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+}
+
 module.exports = {
   customer_register,
   customer_login,
   customer_logout,
   register_Mail,
   login_Mail,
+  change_customer_password
 };
