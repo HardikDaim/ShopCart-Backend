@@ -21,14 +21,11 @@ const io = socketIo(server, {
   allowEI03: true,
 });
 
+const allowedOrigins = process.env.CORS_ORIGIN.split(',');
+
 app.use(
   cors({
-    origin: [
-      "https://shop-cart-dashboard.vercel.app",
-      "https://shop-cart-ten-chi.vercel.app",
-      "http://localhost:3000",
-      "http://localhost:3001",
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );

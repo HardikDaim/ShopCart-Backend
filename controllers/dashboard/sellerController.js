@@ -5,11 +5,10 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   secure: true,
   auth: {
-    user: "hardikdaim@gmail.com",
-    pass: "ybjm lryg iyub caax",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
-
 
 const get_seller_request = async (req, res) => {
   const { page, searchValue, perPage } = req.query;
