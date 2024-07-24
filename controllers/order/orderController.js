@@ -138,11 +138,11 @@ const get_orders = async (req, res) => {
       orders = await customerOrderModel.find({
         customerId: new ObjectId(customerId),
         delivery_status: status,
-      });
+      }).sort({createdAt: -1});
     } else {
       orders = await customerOrderModel.find({
         customerId: new ObjectId(customerId),
-      });
+      }).sort({createdAt: -1});
     }
     return res.status(200).json({ orders });
   } catch (error) {
