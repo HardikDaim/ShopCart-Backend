@@ -21,11 +21,11 @@ const get_admiin_dashboard_data = async (req, res) => {
         },
       },
     ]);
-    const totalProduct = await productModel.find({}).countDocuments();
-    const totalOrder = await customerOrder.find({}).countDocuments();
-    const totalSeller = await sellerModel.find({}).countDocuments();
-    const messages = await AdminSellerMessage.find({}).limit(3);
-    const recentOrder = await customerOrder.find({}).limit(5);
+    const totalProduct = await productModel.find({}).countDocuments().sort({createdAt: -1});
+    const totalOrder = await customerOrder.find({}).countDocuments().sort({createdAt: -1});
+    const totalSeller = await sellerModel.find({}).countDocuments().sort({createdAt: -1});
+    const messages = await AdminSellerMessage.find({}).limit(3).sort({createdAt: -1});
+    const recentOrder = await customerOrder.find({}).limit(5).sort({createdAt: -1});
     return res.status(200).json({
       totalProduct,
       totalOrder,
@@ -60,10 +60,10 @@ const get_seller_dashboard_data = async (req, res) => {
     ]);
     const totalProduct = await productModel
       .find({ sellerId: new ObjectId(id) })
-      .countDocuments();
+      .countDocuments().sort({createdAt: -1});
     const totalOrder = await authOrder
       .find({ sellerId: new ObjectId(id) })
-      .countDocuments();
+      .countDocuments().sort({createdAt: -1});
     const totalPendingOrder = await authOrder
       .find({
         $and: [
@@ -79,7 +79,7 @@ const get_seller_dashboard_data = async (req, res) => {
           },
         ],
       })
-      .countDocuments();
+      .countDocuments().sort({createdAt: -1});
     const messages = await sellerCustomerMessage
       .find({
         $or: [
@@ -101,7 +101,7 @@ const get_seller_dashboard_data = async (req, res) => {
       .find({
         sellerId: new ObjectId(id),
       })
-      .limit(5);
+      .limit(5).sort({createdAt: -1});
       return res.status(200).json({
         totalProduct,
         totalOrder,

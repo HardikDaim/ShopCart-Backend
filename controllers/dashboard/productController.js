@@ -333,7 +333,6 @@ const get_products = async (req, res) => {
   }
 };
 
-
 const delete_product = async (req, res) => {
   const { _id } = req.body;
   const productId = _id;

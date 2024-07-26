@@ -105,22 +105,22 @@ const get_dashboard_data = async (req, res) => {
       .find({
         customerId: new ObjectId(customerId),
       })
-      .limit(5);
+      .limit(5).sort({createdAt: -1});
     const pendingOrders = await customerOrderModel
       .find({
         customerId: new ObjectId(customerId),
         delivery_status: "pending",
       })
-      .countDocuments();
+      .countDocuments().sort({createdAt: -1});
     const cancelledOrders = await customerOrderModel
       .find({
         customerId: new ObjectId(customerId),
         delivery_status: "cancelled",
       })
-      .countDocuments();
+      .countDocuments().sort({createdAt: -1});
     const totalOrders = await customerOrderModel
       .find({ customerId: new ObjectId(customerId) })
-      .countDocuments();
+      .countDocuments().sort({createdAt: -1});
     return res
       .status(200)
       .json({ recentOrders, pendingOrders, totalOrders, cancelledOrders });
