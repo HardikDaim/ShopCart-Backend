@@ -97,8 +97,8 @@ const get_category = async (req, res) => {
 
 const formateProduct = (products) => {
   const productArray = [];
-  for (let i = 0; i < products.length; i += 3) {
-    productArray.push(products.slice(i, i + 3));
+  for (let i = 0; i < products.length; i += 10) {
+    productArray.push(products.slice(i, i + 10));
   }
   return productArray;
 };
@@ -112,7 +112,7 @@ const get_product = async (req, res) => {
 
     const latestProducts = await productModel
       .find({})
-      .limit(10)
+      .limit(20)
       .sort({ createdAt: -1 });
     const formattedLatestProducts = formateProduct(latestProducts);
 
