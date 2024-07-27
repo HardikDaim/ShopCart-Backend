@@ -1,56 +1,30 @@
-const paymentModel = require("../../models/paypalModel");
-const sellerModel = require("../../models/sellerModel");
-const QRCode = require('qrcode');
+const qr = require('qr-image');
 
-const create_paypal_connect_account = async (req, res) => {
-  const { id } = req.id;
+const generate_qr = async (req, res) => {
+  const { orderId, amount, upiId } = req.body;
+  if (!orderId || !amount || !upiId) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
   try {
-    await sellerModel.findByIdAndUpdate(req.id, {
-      payment: "active",
-    });
-    const seller = await sellerModel.findById(req.id);
-
-    res
-      .status(200)
-      .json({ message: "Seller Account Activated Successfully.", seller });
+    const upiString = `upi://pay?pa=${upiId}&pn=ShopCart%20-%20An%20E-Commerce%20Platform&mc=0000&tid=${orderId}&tr=${orderId}&tn=Payment for order ${orderId}&am=${amount}&cu=INR`;
+    const qrCode = qr.imageSync(upiString, { type: 'png' });
+    const qrImage = `data:image/png;base64,${qrCode.toString('base64')}`;
+    res.json({ qrImage });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Error generating QR code:', error);
+    res.status(500).json({ error: 'Failed to generate QR code' });
   }
 };
 
-const generate_qr = async (req, res) => {
-  const {orderId , amount, upiId } = req.body;
-  try {
-    const qrData = `upi://pay?pa=${upiId}&am=${amount}&cu=INR&mode=02&purpose=00&orgid=189999&orderid=${orderId}`;
-    const qrImage = await QRCode.toDataURL(qrData);
-    res.json({ qrImage, message: "QR code generated successfully" });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to generate QR code' });
-  }
-}
+// Function to check payment status
+const check_payment_status = async (req, res) => {
+  const { orderId } = req.params;
+  console.log("test")
+ 
+};
 
-const payment_callback = async (req, res) => {
-  const { orderId, status } = req.body;
-  
-  try {
-    // const order = await Order.findById(orderId);
-    // if (!order) {
-    //   return res.status(404).json({ error: 'Order not found' });
-    // }
-
-    if (status === 'SUCCESS') {
-      order.paymentStatus = 'paid';
-      await order.save();
-      return res.status(200).json({ message: 'Payment successful' });
-    } else {
-      return res.status(400).json({ error: 'Payment failed' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Payment processing failed' });
-  }
-}
 module.exports = {
-  create_paypal_connect_account,
-  generate_qr,payment_callback
+  generate_qr,
+  check_payment_status
 };
