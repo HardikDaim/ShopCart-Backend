@@ -355,14 +355,14 @@ const delete_product = async (req, res) => {
 
 const get_discounted_products = async (req, res) => {
   const { page, searchValue, perPage } = req.query;
-  const { id } = req;
+  const { id } = req; // sellerId
 
   const pageInt = parseInt(page);
   const perPageInt = parseInt(perPage);
   const skipPage = perPageInt * (pageInt - 1);
 
   try {
-    let query = { discount: { $gt: 0 } }; // Query for discounted products
+    let query = { discount: { $gt: 0 }, sellerId: id, }; // Query for discounted products of loggedIn seller only
 
     if (searchValue) {
       query.$or = [
