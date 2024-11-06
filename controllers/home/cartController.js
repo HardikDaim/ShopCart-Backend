@@ -145,7 +145,7 @@ const get_cart_products = async (req, res) => {
       cart_products: p,
       price: calculatedPrice,
       cart_product_count,
-      shipping_fee: 100 * p.length,
+      shipping_fee: 0 * p.length,
       outOfStockProducts,
       buy_product_item,
     });
