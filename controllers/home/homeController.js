@@ -163,29 +163,21 @@ const price_range_product = async (req, res) => {
 };
 
 const query_products = async (req, res) => {
-  const perPage = 12;
+  const perPage = 20;
   req.query.perPage = perPage;
+
   try {
-    const products = await productModel.find({}).sort({ createdAt: -1 });
-    const totalProducts = queryProducts(products, req.query)
-      .categoryQuery()
-      .ratingQuery()
-      .searchQuery()
-      .priceQuery()
-      .sortByPrice()
-      .countProducts();
-    const result = queryProducts(products, req.query)
-      .categoryQuery()
-      .ratingQuery()
-      .priceQuery()
-      .searchQuery()
-      .sortByPrice()
-      .skip()
-      .limit()
-      .getProducts();
+    // Get the total count of products after filtering
+    const productsQuery = productModel; // Reference to the MongoDB model
+    const filteredProducts = queryProducts(productsQuery, req.query);
+
+    const [totalProducts, products] = await Promise.all([
+      filteredProducts.clone().countDocuments(), // Clone the query to count total products
+      filteredProducts.exec(), // Execute the query to fetch the paginated products
+    ]);
 
     return res.status(200).json({
-      products: result,
+      products,
       totalProducts,
       perPage,
     });

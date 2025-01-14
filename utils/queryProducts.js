@@ -1,86 +1,52 @@
-// queryProducts.js
-const queryProducts = (products, query) => {
-  let currentProducts = [...products];
+const queryProducts = (productsQuery, query) => {
+  const { category, rating, searchValue, lowPrice, highPrice, selectedOption, pageNumber, perPage } = query;
 
-  const categoryQuery = () => {
-    if (query.category) {
-      currentProducts = currentProducts.filter(c => c.category === query.category);
-    }
-    return api;
-  };
+  // Initialize MongoDB query object
+  const dbQuery = {};
 
-  const ratingQuery = () => {
-    if (query.rating) {
-      currentProducts = currentProducts.filter(c =>
-        parseInt(query.rating) <= c.rating && c.rating < parseInt(query.rating) + 1
-      );
-    }
-    return api;
-  };
-  
-  const searchQuery = () => {
-    if (query.searchValue) {
-      currentProducts = currentProducts.filter(p => p.name.toUpperCase().includes(query.searchValue.toUpperCase()));
-    }
-    return api;
-  };
+  // Apply category filter
+  if (category) {
+    dbQuery.category = category;
+  }
 
-  const priceQuery = () => {
-    if (query.lowPrice !== undefined && query.highPrice !== undefined) {
-      currentProducts = currentProducts.filter(p => p.price >= query.lowPrice && p.price <= query.highPrice);
-    }
-    return api;
-  };
+  // Apply rating filter
+  if (rating) {
+    const minRating = parseInt(rating);
+    dbQuery.rating = { $gte: minRating, $lt: minRating + 1 };
+  }
 
-  const sortByPrice = () => {
-    if (query.selectedOption) {
-      if (query.selectedOption === 'low-to-high') {
-        currentProducts = currentProducts.sort((a, b) => a.price - b.price);
-      } else {
-        currentProducts = currentProducts.sort((a, b) => b.price - a.price);
-      }
-    }
-    return api;
-  };
+  // Apply search filter
+  if (searchValue) {
+    dbQuery.name = { $regex: searchValue, $options: "i" };
+  }
 
-  const skip = () => {
-    const { pageNumber, perPage } = query;
-    if (pageNumber && perPage) {
-      const skipPage = (parseInt(pageNumber) - 1) * perPage;
-      currentProducts = currentProducts.slice(skipPage);
-    }
-    return api;
-  };
+  // Apply price filter
+  if (lowPrice !== undefined && highPrice !== undefined) {
+    dbQuery.price = { $gte: lowPrice, $lte: highPrice };
+  }
 
-  const limit = () => {
-    const { perPage } = query;
-    if (perPage) {
-      currentProducts = currentProducts.slice(0, perPage);
-    }
-    return api;
-  };
+  // Sort products
+  const sortQuery = {};
+  if (selectedOption === "low-to-high") {
+    sortQuery.price = 1;
+  } else if (selectedOption === "high-to-low") {
+    sortQuery.price = -1;
+  } else {
+    sortQuery.createdAt = -1; // Default sorting by newest
+  }
 
-  const getProducts = () => {
-    return currentProducts;
-  };
+  // Pagination
+  const skip = perPage ? (parseInt(pageNumber || 1) - 1) * perPage : 0;
+  const limit = parseInt(perPage) || 20;
 
-  const countProducts = () => {
-    return currentProducts.length;
-  };
+  // Final query
+  const queryObject = productsQuery
+    .find(dbQuery)
+    .sort(sortQuery)
+    .skip(skip)
+    .limit(limit);
 
-  const api = {
-    categoryQuery,
-    searchQuery,
-    ratingQuery,
-    priceQuery,
-    sortByPrice,
-    skip,
-    limit,
-    getProducts,
-    countProducts,
-  };
-
-  return api;
+  return queryObject;
 };
 
 module.exports = queryProducts;
