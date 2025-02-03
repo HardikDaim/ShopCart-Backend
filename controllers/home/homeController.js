@@ -163,7 +163,7 @@ const price_range_product = async (req, res) => {
 };
 
 const query_products = async (req, res) => {
-  const perPage = 20;
+  const perPage = 40;
   req.query.perPage = perPage;
 
   try {
