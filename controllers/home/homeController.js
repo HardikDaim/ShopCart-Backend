@@ -163,16 +163,16 @@ const price_range_product = async (req, res) => {
 };
 
 const query_products = async (req, res) => {
-  const perPage = 40;
-  req.query.perPage = perPage;
+  const perPage = 30;
+  const pageNumber = parseInt(req.query.pageNumber) || 1;
 
   try {
     // Get the total count of products after filtering
-    const productsQuery = productModel; // Reference to the MongoDB model
-    const filteredProducts = queryProducts(productsQuery, req.query);
+    const productsQuery = productModel.find(); // Reference to the MongoDB model
+    const filteredProducts = queryProducts(productsQuery, { ...req.query, perPage, pageNumber });
 
     const [totalProducts, products] = await Promise.all([
-      filteredProducts.clone().countDocuments(), // Clone the query to count total products
+      productModel.countDocuments(filteredProducts.getFilter()), // Count total products
       filteredProducts.exec(), // Execute the query to fetch the paginated products
     ]);
 
@@ -180,6 +180,7 @@ const query_products = async (req, res) => {
       products,
       totalProducts,
       perPage,
+      pageNumber,
     });
   } catch (error) {
     console.error("Error:", error);

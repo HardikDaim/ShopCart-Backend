@@ -36,8 +36,8 @@ const queryProducts = (productsQuery, query) => {
   }
 
   // Pagination
-  const skip = perPage ? (parseInt(pageNumber || 1) - 1) * perPage : 0;
-  const limit = parseInt(perPage) || 20;
+  const skip = (pageNumber - 1) * perPage;
+  const limit = perPage;
 
   // Final query
   const queryObject = productsQuery
