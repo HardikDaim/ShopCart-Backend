@@ -21,10 +21,7 @@ const io = socketIo(server, {
   allowEI03: true,
 });
 
-const allowedOrigins = [
-  process.env.CORS_ORIGIN_1,
-  process.env.CORS_ORIGIN_2
-];
+const allowedOrigins = process.env.CORS_ORIGIN.split(',');
 
 app.use(
   cors({
